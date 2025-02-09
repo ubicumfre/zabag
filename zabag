@@ -1,0 +1,14 @@
+---
+- name: Check Zabbix Agent Version
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Check if Zabbix Agent is installed
+      command: "zabbix_agentd -V"
+      register: zabbix_agent_version
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Display Zabbix Agent Version
+      debug:
+        msg: "{{ zabbix_agent_version.stdout_lines | default('Zabbix Agent not installed') }}"
