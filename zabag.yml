@@ -1,38 +1,8 @@
 ---
-- name: Check Zabbix Agent Version and Ubuntu Version
+- name: Get Hard Drive Information
   hosts: all
-  gather_facts: true  # Needed for Ubuntu version
+  gather_facts: yes
   tasks:
-    - name: Get OS distribution
-      set_fact:
-        os_family: "{{ ansible_os_family }}"
-        os_version: "{{ ansible_distribution_version }}"
-
-    - name: Check Zabbix Agent Version (Ubuntu/Debian)
-      command: "dpkg -l | grep zabbix-agent"
-      register: zabbix_dpkg
-      ignore_errors: yes
-      changed_when: false
-      when: os_family == "Debian"
-
-    - name: Check Zabbix Agent Version (RHEL/CentOS)
-      command: "rpm -q zabbix-agent"
-      register: zabbix_rpm
-      ignore_errors: yes
-      changed_when: false
-      when: os_family == "RedHat"
-
-    - name: Display Zabbix Agent Version (Debian)
+    - name: Display hard drive information
       debug:
-        msg: "{{ zabbix_dpkg.stdout_lines | default('Zabbix Agent not installed') }}"
-      when: os_family == "Debian"
-
-    - name: Display Zabbix Agent Version (RHEL)
-      debug:
-        msg: "{{ zabbix_rpm.stdout_lines | default('Zabbix Agent not installed') }}"
-      when: os_family == "RedHat"
-
-    - name: Display Ubuntu Version (if applicable)
-      debug:
-        msg: "Ubuntu Version: {{ os_version }}"
-      when: os_family == "Debian"
+        var: ansible_devices
