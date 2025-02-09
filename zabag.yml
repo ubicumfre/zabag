@@ -5,4 +5,4 @@
   tasks:
     - name: Extract and display hard drive model
       debug:
-        msg: "{{ ansible_devices | dict2items | map(attribute='value.model') | list }}"
+        msg: "{{ ansible_devices | dict2items | selectattr('value.model', 'defined') | map(attribute='value.model') | list }}"
