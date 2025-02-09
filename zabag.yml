@@ -1,8 +1,8 @@
 ---
-- name: Get Hard Drive Information
+- name: Get Hard Drive Model
   hosts: all
   gather_facts: yes
   tasks:
-    - name: Display hard drive information
+    - name: Extract and display hard drive model
       debug:
-        var: ansible_devices
+        msg: "{{ ansible_devices | dict2items | map(attribute='value.model') | list }}"
