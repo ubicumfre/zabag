@@ -1,8 +1,30 @@
 ---
-- name: Get Hard Drive Model
+- name: Gather Hard Drive Model Info
   hosts: all
-  gather_facts: yes
+  gather_facts: no
   tasks:
-    - name: Extract and display hard drive model
+    - name: Check if lsblk is available
+      command: which lsblk
+      register: lsblk_check
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Get Hard Drive Model using lsblk
+      command: lsblk -d -o NAME,MODEL --noheadings
+      register: hdd_model_lsblk
+      when: lsblk_check.rc == 0
+      changed_when: false
+
+    - name: Get Hard Drive Model using udevadm (fallback)
+      shell: "udevadm info --query=all --name=/dev/sda | grep 'ID_MODEL=' | cut -d= -f2"
+      register: hdd_model_udev
+      when: lsblk_check.rc != 0
+      changed_when: false
+
+    - name: Set fact for HDD model
+      set_fact:
+        hdd_model: "{{ hdd_model_lsblk.stdout_lines | default(hdd_model_udev.stdout_lines) }}"
+
+    - name: Display Hard Drive Model
       debug:
-        msg: "{{ ansible_devices | dict2items | selectattr('value.model', 'defined') | map(attribute='value.model') | list }}"
+        msg: "Host {{ inventory_hostname }} - Hard Drive Model: {{ hdd_model }}"
